@@ -23,16 +23,29 @@
 (define hola(TDAimage 2 2 (pixbit-d  0 0 0 10) (pixbit-d  0 1 0 20) (pixbit-d 1 0 0 30) (pixbit-d 1 1 1 4)))
 (define holaa(TDAimage 2 2 (pixrgb-d  0 0 255 10 10 10) (pixrgb-d  0 1 20 20 20 20) (pixrgb-d 1 0 30 30 30 30) (pixrgb-d 1 1 40 40 40 40)))
 (define holaaa(TDAimage 2 2 (pixhex-d  0 0 "a" 10) (pixhex-d  0 1 "a" 20) (pixhex-d 1 0 "a" 30) (pixhex-d 1 1 "a" 4)))
-
+(define holaaaa(TDAimage 3 3 (pixbit-d  0 0 0 10) (pixbit-d  0 1 0 20)(pixbit-d  0 2 0 10) (pixbit-d 1 0 0 30) (pixbit-d 1 1 1 4)(pixbit-d  1 2 0 10)(pixbit-d  2 0 0 10)(pixbit-d  2 1 0 10)(pixbit-d  2 2 0 10)))
 ;
 (define (transformar lista salida)
   (if(null? lista)
       (reverse salida)
      (transformar (cdr lista) (cons (cddr(car lista)) salida))))
-(define (flipH imagen)
-  (print(lista-coordenadas (car imagen) (car(cdr imagen)) 0 0 null))
-  (transformar (car(cddr imagen)) null))
 
-(define (prueba a)
-      (cons(reverse(cons(car a)(list(car(cdr a)))))(reverse(cons(car(cddr a))(list(car(cdddr a)))))))
-   
+(define (flipH imagen)
+  ;(print(lista-coordenadas (car imagen) (car(cdr imagen)) 0 0 null))
+  (invertirH (car(cdr imagen)) 0 (transformar (car(cddr imagen)) null) null null))
+
+(define (invertirH punto i lista a b)
+  (if(null? lista)
+     (reverse (cons a b))
+     (if(= punto i)
+        (invertirH punto 1 (cdr lista) (reverse(cons(car lista)null)) (cons a b))
+      (invertirH punto (+ 1 i) (cdr lista) (cons (car lista) a ) b)  
+)))
+(define (volver lista lista-aux lista-salida)
+  (if(null? lista)
+     (reverse (cons(car lista-aux)lista-salida))
+     (if(null? (cdr lista-aux))
+        (volver (cdr lista) (car(cdr lista)) lista-salida)
+       (volver lista (cdr lista-aux) (cons (car lista-aux) lista-salida))) 
+))
+  
