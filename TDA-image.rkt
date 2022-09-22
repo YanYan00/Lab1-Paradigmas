@@ -1,7 +1,7 @@
 #lang racket
 (require "bitmap.rkt")
 (require "pixmap.rkt")
-(require "hexmap.rkt")
+(require "hexmap.rkt")  
 (define(lista-coordenadas x y v z lista)
   (if(= x v)
      (reverse lista)
@@ -19,7 +19,20 @@
       (equal? (lista-coordenadas alto ancho 0 0 null) (orden-datos datos null)))
   (list alto ancho datos)
   (print "ingresa los datos correctamente")))
-
+;
 (define hola(TDAimage 2 2 (pixbit-d  0 0 0 10) (pixbit-d  0 1 0 20) (pixbit-d 1 0 0 30) (pixbit-d 1 1 1 4)))
 (define holaa(TDAimage 2 2 (pixrgb-d  0 0 255 10 10 10) (pixrgb-d  0 1 20 20 20 20) (pixrgb-d 1 0 30 30 30 30) (pixrgb-d 1 1 40 40 40 40)))
 (define holaaa(TDAimage 2 2 (pixhex-d  0 0 "a" 10) (pixhex-d  0 1 "a" 20) (pixhex-d 1 0 "a" 30) (pixhex-d 1 1 "a" 4)))
+
+;
+(define (transformar lista salida)
+  (if(null? lista)
+      (reverse salida)
+     (transformar (cdr lista) (cons (cddr(car lista)) salida))))
+(define (flipH imagen)
+  (print(lista-coordenadas (car imagen) (car(cdr imagen)) 0 0 null))
+  (transformar (car(cddr imagen)) null))
+
+(define (prueba a)
+      (cons(reverse(cons(car a)(list(car(cdr a)))))(reverse(cons(car(cddr a))(list(car(cdddr a)))))))
+   
