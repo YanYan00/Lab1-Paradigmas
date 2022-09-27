@@ -1,6 +1,5 @@
 #lang racket
 ;--------------Selectores pixrgb-d--------------
-(provide (all-defined-out))
 (define (get-x x)
   (car x))
 (define (get-y x)
@@ -18,3 +17,4 @@
       (if(and(=(length(caaddr imagen))6))
          #t
          #f))
+(provide (all-defined-out))
