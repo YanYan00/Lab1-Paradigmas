@@ -9,8 +9,8 @@ flipH					1
 flipV					1
 crop				       0.75
 imgRGB->imgHex				1
-histogram			       0.25
-Rotate90				0	
+histogram			       0.5
+Rotate90				1	
 Compress				0
 Edit					0
 invertColorBit				0

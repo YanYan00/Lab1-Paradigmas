@@ -58,8 +58,7 @@
      (if(=(* alto ancho)(length datos))
           (list ancho alto (ord-pix-envoltorio (lista-coordenadas ancho alto 0 0 null) datos))
       (list ancho alto datos))
-   (print "ingresa los datos correctamente")))   
-
+   (print "ingresa los datos correctamente"))) 
 ;--------------Funcion compressed?---------------
 ;Dominio: imagen
 ;Recorrido: booleano
@@ -151,6 +150,7 @@
           (volverEnvoltorio (agrupar (get-ancho imagen)0(transformar (get-pixeles imagen) null) null null)
         ))))
 ;--------------Funcion crop--------------
+;--------------INGRESAR CORTES DE IMAGEN CORRECTOS--------------------
 ;Dominio: lista(pixeles) x1 x2 lista-salida
 ;Recorrido: lista-salida
 ;Descripcion:  filtra la imagen cuando cuanto el alto no está entre x1 y x2
@@ -304,13 +304,66 @@
 ;Tipo de recursion: no hay
 (define(imgRGB->imgHex imagen)
   (list (get-ancho imagen)(get-alto imagen)(crearHex (get-pixeles imagen)(transformarHex(filtro-depth (transformar(get-pixeles imagen)null))))))
-;--------------Histogram------
-
-     
-(define (histogram imagen)
-  (filtro-depth(transformar(get-pixeles imagen)null)))
+;--------------Histogram-----------
+;-------------SOLO FUNCIONA PARA IMAGENES TIPO PIXBIT-----------------
+;Dominio: lista
+;Recorrido: int
+;Descripcion: cuenta cuantas veces se repite un valor en la lista de pixeles
+;Tipo de recursion: lineal
+(define (contar-env lista valor)
+  (define (contar lista1 contador valor)
+    (if (eqv? lista1 '())
+        contador
+      (if (equal? (car lista1) valor)
+       (contar (cdr lista1) (+ 1 contador)valor)
+       ( contar (cdr lista1) contador valor))))
+    (contar lista 0 valor))
+;Dominio: lista
+;Recorrido: lista
+;Descripcion: borra todos los datos valor que encuentre en lista
+;Tipo de recursion: lineal
+(define (filtrar-env lista valor)
+  (define (filtrar lista1 lista2 valor)
+    (if (eqv? lista1 '())
+        (reverse lista2)
+      (if (equal? (car lista1) valor)
+       (filtrar (cdr lista1) lista2 valor)
+       (filtrar (cdr lista1) (cons (car lista1) lista2) valor))))
+    (filtrar lista null valor))
+;Dominio: lista
+;Recorrido: lista
+;Descripcion: transforma la lista de los pixeles en una lista de colores
+;Tipo de recursion: lineal
+(define (transformar-env lista)
+  (define (transformar lista1 lista2)
+    (if(eqv? lista1 '())
+       (reverse lista2)
+     (transformar (cdr lista1) (cons (reverse(cdr(reverse(cddr(car lista1))))) lista2))))
+  (transformar lista null))
+;Dominio: lista
+;Recorrido: lista
+;Descripcion: agrega a una lista vacia la cantidad de veces que se repite un pixel, en conjunto con el pixel
+;Tipo de recursion: lineal
+(define(proceso-env datos)
+  (define(proceso datos lista dato)
+    (if(eqv? datos '())
+      (reverse lista) 
+    (proceso (filtrar-env datos (car datos)) (cons (cons (contar-env datos dato) (list dato) ) lista) (car(cdr datos)))
+    ))
+  (proceso datos null (car datos)))
+;Dominio: lista
+;Recorrido: lista
+;Descripcion: llama a las funciones para iltrar los colores por tipo
+;Tipo de recursion: no hay   
+(define (histogram datos)
+  (proceso-env (transformar-env (get-pixeles datos)
+  )))
 
 ;--------------Funcion rotate90-------------
+;Dominio: lista X int X int
+;Recorrido: lista
+;Descripcion: agrupa por tramos pares
+;Tipo de recursion: lineal
 (define(agruparEnvoltorio lista ancho alto)
         (define(agrupar-tramos-cuadrados lista lista-aux elemento ancho alto x y lista-salida)
           (if(= (-(* alto alto)alto) x)
@@ -322,7 +375,10 @@
                    (agrupar-tramos-cuadrados lista (cdr lista-aux) (cadr lista-aux) ancho alto x (+ y 1) lista-salida))     
                 )))
    (agrupar-tramos-cuadrados lista lista (cons (car lista) null) ancho alto 0 0 null))
-;
+;Dominio: lista X int X int
+;Recorrido: lista
+;Descripcion: agrupa por tramos impares
+;Tipo de recursion: lineal
 (define(agruparEnvoltorioNoCuadrados lista ancho alto)
         (define(agrupar-tramos-no lista lista-aux elemento ancho alto x y lista-salida)
           (if(= (-(* alto ancho)ancho) x)
@@ -331,19 +387,23 @@
                 (agrupar-tramos-no  lista lista-aux (cadr lista) ancho alto (+ x 1) 0 (cons elemento lista-salida))
                 (if(null? (cdr lista-aux))
                    (agrupar-tramos-no (cdr lista) (cdr lista) (car(cdr lista)) ancho alto x 0 (cons (car(cdr lista)) lista-salida))
-                   (agrupar-tramos-no lista (cdr lista-aux) (cadr lista-aux) ancho alto x (+ y 1) lista-salida))     
-            
+                   (agrupar-tramos-no lista (cdr lista-aux) (cadr lista-aux) ancho alto x (+ y 1) lista-salida))        
                 )))
   (agrupar-tramos-no lista lista (cons (car lista)null) ancho alto 0 0 null))
-;
-  
+;Dominio: int X int X list X list X list
+;Recorrido: lista
+;Descripcion: separa listas agrupadas por tramos de pares o impares
+;Tipo de recursion: lineal
 (define(separar cantidad i lista lista-agregar lista-salida)
   (if(null? lista)
      (reverse (cons lista-agregar lista-salida))
    (if(= cantidad i)
       (separar cantidad 1 (cdr lista) (cons(car lista) null) (cons lista-agregar lista-salida))
      (separar cantidad (+ i 1) (cdr lista) (cons (car lista) lista-agregar) lista-salida))))
-
+;Dominio: imagen
+;Recorrido: imagen
+;Descripcion:compara si las dimensiones son iguales o distintas, despues de eso ve si trabaja con tramos pares o tramos impares
+;Tipo de recursion: no hay
 (define(rotate90 imagen)
   (if(=(get-ancho imagen)(get-alto imagen))
      (list (get-ancho imagen) (get-alto imagen) (juntarEnvoltorio (lista-coordenadas (get-ancho imagen) (get-alto imagen) 0 0 null)
